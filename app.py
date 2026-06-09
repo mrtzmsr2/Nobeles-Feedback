@@ -465,6 +465,35 @@ def automat_neu(sid: int):
     return redirect(url_for("standort_detail", sid=sid))
 
 
+@app.route("/automat/<int:aid>/bearbeiten", methods=["GET", "POST"])
+@staff_required
+def automat_bearbeiten(aid: int):
+    a = db.session.get(Automat, aid) or abort(404)
+    if not standort_zugriff(a.standort_id):
+        abort(403)
+
+    if request.method == "POST":
+        bezeichnung = (request.form.get("bezeichnung") or "").strip()
+        if not bezeichnung:
+            flash("Bezeichnung ist Pflicht.", "danger")
+            return redirect(url_for("automat_bearbeiten", aid=aid))
+        a.bezeichnung = bezeichnung
+        a.modell = (request.form.get("modell") or "").strip() or None
+        a.lieferant = (request.form.get("lieferant") or "").strip() or None
+        # Standort-Wechsel nur für Admins
+        if current_user.is_admin:
+            neu_sid = request.form.get("standort_id", type=int)
+            if neu_sid and neu_sid != a.standort_id:
+                if db.session.get(Standort, neu_sid):
+                    a.standort_id = neu_sid
+        db.session.commit()
+        flash(f'Automat "{a.bezeichnung}" aktualisiert.', "success")
+        return redirect(url_for("standort_detail", sid=a.standort_id))
+
+    standorte = Standort.query.order_by(Standort.name).all() if current_user.is_admin else []
+    return render_template("automat_bearbeiten.html", automat=a, standorte=standorte)
+
+
 @app.route("/automat/<int:aid>/loeschen", methods=["POST"])
 @admin_required
 def automat_loeschen(aid: int):

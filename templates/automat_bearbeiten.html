@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Automat bearbeiten – {{ automat.bezeichnung }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+    <h2>✏️ Automat bearbeiten</h2>
+    <div class="toolbar-right">
+        <a href="{{ url_for('standort_detail', sid=automat.standort_id) }}" class="btn btn-secondary btn-sm">← Zurück</a>
+    </div>
+</div>
+
+<div class="card" style="max-width: 720px;">
+    <p style="color: var(--fom-gray-600); margin-bottom: 16px;">
+        📍 <strong>{{ automat.standort.name }}</strong>
+    </p>
+
+    <form method="POST">
+        <div class="form-group">
+            <label>Bezeichnung *</label>
+            <input type="text" name="bezeichnung" value="{{ automat.bezeichnung }}" required placeholder="z.B. Küche EG / Pausenraum 2. OG">
+        </div>
+        <div class="form-group">
+            <label>Modell</label>
+            <input type="text" name="modell" value="{{ automat.modell or '' }}" placeholder="z.B. Jura X8">
+        </div>
+        <div class="form-group">
+            <label>Lieferant</label>
+            <input type="text" name="lieferant" value="{{ automat.lieferant or '' }}" placeholder="z.B. Tchibo Coffee Service">
+        </div>
+
+        {% if current_user.is_admin and standorte %}
+        <div class="form-group">
+            <label>Standort {% if standorte|length > 1 %}<small style="color:#999; font-weight:normal;">(Verschiebung möglich)</small>{% endif %}</label>
+            <select name="standort_id">
+                {% for s in standorte %}
+                <option value="{{ s.id }}" {% if s.id == automat.standort_id %}selected{% endif %}>{{ s.name }}{% if s.region %} · {{ s.region }}{% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <div style="display:flex; gap: 8px; margin-top: 16px;">
+            <button type="submit" class="btn btn-primary">💾 Speichern</button>
+            <a href="{{ url_for('standort_detail', sid=automat.standort_id) }}" class="btn btn-secondary">Abbrechen</a>
+        </div>
+    </form>
+</div>
+
+<div class="card" style="max-width: 720px; background: #f9f9f9;">
+    <h3 style="font-size: 14px; margin-bottom: 8px; color: var(--fom-gray-600);">ℹ️ Technische Infos</h3>
+    <p style="font-size: 13px; color: var(--fom-gray-600); line-height: 1.7;">
+        <strong>QR-Token:</strong> <code>{{ automat.qr_token }}</code><br>
+        <strong>Feedback-Link:</strong> <code>{{ request.host_url.rstrip('/') }}/f/{{ automat.qr_token }}</code><br>
+        <strong>Angelegt:</strong> {{ automat.created_at|dt if automat.created_at else '—' }}
+    </p>
+</div>
+{% endblock %}

@@ -64,6 +64,7 @@
                     </td>
                     <td class="text-right" style="white-space:nowrap;">
                         <a href="{{ url_for('automat_feedbacks', aid=row.automat.id) }}" class="btn btn-secondary btn-sm" title="Alle Feedbacks ansehen">💬</a>
+                        <a href="{{ url_for('automat_bearbeiten', aid=row.automat.id) }}" class="btn btn-secondary btn-sm" title="Automat bearbeiten">✏️</a>
                         <a href="{{ url_for('automat_qr_print', aid=row.automat.id) }}" target="_blank" class="btn btn-secondary btn-sm" title="QR-Sticker drucken">🖨️</a>
                         {% if current_user.is_admin %}
                         <form method="POST" action="{{ url_for('automat_loeschen', aid=row.automat.id) }}" style="display:inline" onsubmit="return confirm('Automat „{{ row.automat.bezeichnung }}\" wirklich löschen?');">
