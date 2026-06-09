@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Benutzer{% endblock %}
+{% block content %}
+<div class="toolbar">
+    <h2>👥 Benutzerverwaltung</h2>
+</div>
+
+<div class="card">
+    <h2>Alle Benutzer ({{ users|length }})</h2>
+    <p style="color: var(--fom-gray-600); font-size: 13px; margin-bottom: 12px;">
+        Neue Konten werden bei der Selbst-Registrierung deaktiviert angelegt — schalte sie hier frei und weise eine Rolle/Standort zu.
+    </p>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name / E-Mail</th>
+                    <th>Erstellt</th>
+                    <th>Letzter Login</th>
+                    <th>Rolle</th>
+                    <th>Standort</th>
+                    <th class="text-center">Aktiv</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td><strong>{{ u.name }}</strong><br><small style="color:#666">{{ u.email }}</small></td>
+                    <td><small>{{ u.created_at|d }}</small></td>
+                    <td><small>{{ u.last_login|dt if u.last_login else '—' }}</small></td>
+                    <td>
+                        <form method="POST" action="{{ url_for('benutzer_update', uid=u.id) }}" id="form-{{ u.id }}" style="display:contents;">
+                            <select name="rolle" form="form-{{ u.id }}">
+                                <option value="viewer" {% if u.rolle=='viewer' %}selected{% endif %}>👁️ Viewer</option>
+                                <option value="leiter" {% if u.rolle=='leiter' %}selected{% endif %}>🏢 Standortleitung</option>
+                                <option value="admin" {% if u.rolle=='admin' %}selected{% endif %}>🛡️ Admin</option>
+                            </select>
+                    </td>
+                    <td>
+                        <select name="standort_id" form="form-{{ u.id }}">
+                            <option value="">— (alle / keiner) —</option>
+                            {% for s in standorte %}
+                            <option value="{{ s.id }}" {% if u.standort_id==s.id %}selected{% endif %}>{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td class="text-center">
+                        <label style="display:inline-flex; align-items:center; gap:6px;">
+                            <input type="checkbox" name="aktiv" form="form-{{ u.id }}" {% if u.is_active_flag %}checked{% endif %} style="width:18px; height:18px; accent-color: var(--fom-primary);">
+                        </label>
+                    </td>
+                    <td class="text-right" style="white-space:nowrap;">
+                        <button type="submit" form="form-{{ u.id }}" class="btn btn-primary btn-sm">💾</button>
+                        </form>
+                        <button type="button" class="btn btn-warning btn-sm" onclick="document.getElementById('pwForm-{{ u.id }}').classList.toggle('hidden')">🔑</button>
+                        {% if u.id != current_user.id %}
+                        <form method="POST" action="{{ url_for('benutzer_loeschen', uid=u.id) }}" style="display:inline" onsubmit="return confirm('Benutzer {{ u.email }} wirklich löschen?');">
+                            <button class="btn btn-danger btn-sm" type="submit">🗑️</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr id="pwForm-{{ u.id }}" class="hidden">
+                    <td colspan="7" style="background:#fff3cd; padding:12px;">
+                        <form method="POST" action="{{ url_for('benutzer_reset_pw', uid=u.id) }}" style="display:flex; gap:8px; align-items:center;">
+                            <strong>🔑 Passwort für {{ u.email }} zurücksetzen:</strong>
+                            <input type="text" name="neues_passwort" required minlength="10" placeholder="Neues Passwort (min. 10 Zeichen)" style="flex:1; padding: 6px 10px;">
+                            <button type="submit" class="btn btn-warning btn-sm">Setzen</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>.hidden { display: none; }</style>
+{% endblock %}

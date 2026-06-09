@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danke!</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #00d9cc 0%, #00bfb3 50%, #008c82 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: white; padding: 24px; text-align: center; }
+.box { max-width: 420px; }
+.icon { font-size: 84px; margin-bottom: 16px; animation: pop .6s cubic-bezier(.18,.89,.32,1.28); }
+h1 { font-size: 2rem; margin-bottom: 12px; }
+p { font-size: 1rem; opacity: .95; margin-bottom: 24px; line-height: 1.6; }
+.btn { display: inline-block; padding: 12px 28px; background: white; color: #00bfb3; border-radius: 9999px; font-weight: 700; text-decoration: none; transition: all .2s; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+.location { background: rgba(255,255,255,.15); padding: 10px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 24px; display: inline-block; }
+@keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+</style>
+</head>
+<body>
+<div class="box">
+    <div class="icon">🎉</div>
+    <h1>Danke für dein Feedback!</h1>
+    <div class="location">📍 {{ automat.standort.name }} · {{ automat.bezeichnung }}</div>
+    <p>Wir kümmern uns drum.<br>Dein Feedback hilft uns, den Service zu verbessern.</p>
+    <a href="{{ url_for('feedback_form', token=automat.qr_token) }}" class="btn">Neues Feedback geben</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}{{ standort.name }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+    <h2>🏢 {{ standort.name }}{% if standort.region %} <small style="color:#999; font-weight:normal;">· {{ standort.region }}</small>{% endif %}</h2>
+    <div class="toolbar-right">
+        <a href="{{ url_for('standorte_liste') }}" class="btn btn-secondary btn-sm">← Alle Standorte</a>
+    </div>
+</div>
+
+{% if standort.adresse %}
+<p style="color: var(--fom-gray-600); margin-bottom: 16px;">📍 {{ standort.adresse }}</p>
+{% endif %}
+
+<div class="card">
+    <h2>➕ Neuen Automaten anlegen</h2>
+    <form method="POST" action="{{ url_for('automat_neu', sid=standort.id) }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Bezeichnung *</label>
+                <input type="text" name="bezeichnung" required placeholder="z.B. Küche EG / Pausenraum 2. OG">
+            </div>
+            <div class="form-group">
+                <label>Modell</label>
+                <input type="text" name="modell" placeholder="z.B. Jura X8">
+            </div>
+            <div class="form-group">
+                <label>Lieferant</label>
+                <input type="text" name="lieferant" placeholder="z.B. Tchibo Coffee Service">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">➕ Automat anlegen</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>☕ Automaten ({{ automaten_data|length }})</h2>
+    {% if automaten_data %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Bezeichnung</th>
+                    <th>Modell / Lieferant</th>
+                    <th class="text-center">Ø Bewertung</th>
+                    <th class="text-right">Feedbacks (30T)</th>
+                    <th class="text-right">Gesamt</th>
+                    <th class="text-center">Offene Tickets</th>
+                    <th class="text-center">QR-Code</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in automaten_data %}
+                <tr>
+                    <td><strong>{{ row.automat.bezeichnung }}</strong></td>
+                    <td><small>{{ row.automat.modell or '—' }}{% if row.automat.lieferant %} · {{ row.automat.lieferant }}{% endif %}</small></td>
+                    <td class="text-center">
+                        {% if row.avg %}<strong>{{ row.avg }}</strong> / 5{% else %}<span style="color:#bbb">—</span>{% endif %}
+                    </td>
+                    <td class="text-right">{{ row.anzahl_30 }}</td>
+                    <td class="text-right">{{ row.anzahl }}</td>
+                    <td class="text-center">
+                        {% if row.offene_tickets %}<span class="badge badge-warning">⚠️ {{ row.offene_tickets }}</span>
+                        {% else %}<span class="badge badge-success">✓</span>{% endif %}
+                    </td>
+                    <td class="text-center">
+                        <a href="{{ url_for('automat_qr_png', aid=row.automat.id) }}" target="_blank" title="QR-Code PNG"><img src="{{ url_for('automat_qr_png', aid=row.automat.id) }}" alt="QR" style="width:48px; height:48px; vertical-align:middle;"></a>
+                    </td>
+                    <td class="text-right" style="white-space:nowrap;">
+                        <a href="{{ url_for('automat_feedbacks', aid=row.automat.id) }}" class="btn btn-secondary btn-sm" title="Alle Feedbacks ansehen">💬</a>
+                        <a href="{{ url_for('automat_qr_print', aid=row.automat.id) }}" target="_blank" class="btn btn-secondary btn-sm" title="QR-Sticker drucken">🖨️</a>
+                        {% if current_user.is_admin %}
+                        <form method="POST" action="{{ url_for('automat_loeschen', aid=row.automat.id) }}" style="display:inline" onsubmit="return confirm('Automat „{{ row.automat.bezeichnung }}" wirklich löschen?');">
+                            <button class="btn btn-danger btn-sm" type="submit">🗑️</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color: var(--fom-gray-600);">Noch keine Automaten an diesem Standort.</p>
+    {% endif %}
+</div>
+
+{% if automaten_data %}
+<div class="card">
+    <h2>🛠️ Defekt am Automaten melden</h2>
+    <form method="POST" action="" id="ticketForm" enctype="multipart/form-data" onsubmit="this.action = '/automat/' + this.automat_id.value + '/ticket/neu'">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Automat *</label>
+                <select name="automat_id" required>
+                    {% for row in automaten_data %}
+                    <option value="{{ row.automat.id }}">{{ row.automat.bezeichnung }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Priorität</label>
+                <select name="prioritaet">
+                    <option value="niedrig">🟢 Niedrig</option>
+                    <option value="normal" selected>🟡 Normal</option>
+                    <option value="hoch">🔴 Hoch</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Foto (optional)</label>
+                <input type="file" name="foto" accept="image/*">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Beschreibung *</label>
+            <textarea name="beschreibung" required placeholder="Was ist defekt / was ist passiert?"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">🛠️ Ticket anlegen</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

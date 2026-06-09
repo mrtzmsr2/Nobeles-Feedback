@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Standorte{% endblock %}
+{% block content %}
+<div class="toolbar">
+    <h2>🏢 Standorte</h2>
+</div>
+
+{% if current_user.is_admin %}
+<div class="card">
+    <h2>➕ Neuen Standort anlegen</h2>
+    <form method="POST" action="{{ url_for('standort_neu') }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Name *</label>
+                <input type="text" name="name" required placeholder="z.B. Köln-Zentrale">
+            </div>
+            <div class="form-group">
+                <label>Adresse</label>
+                <input type="text" name="adresse" placeholder="Straße, PLZ Ort">
+            </div>
+            <div class="form-group">
+                <label>Region</label>
+                <input type="text" name="region" placeholder="z.B. NRW, Bayern">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">➕ Standort anlegen</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Übersicht ({{ standorte|length }})</h2>
+    {% if standorte %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Region</th>
+                    <th>Adresse</th>
+                    <th class="text-center">Automaten</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in standorte %}
+                <tr>
+                    <td><strong>{{ s.name }}</strong></td>
+                    <td>{{ s.region or '—' }}</td>
+                    <td><small>{{ s.adresse or '—' }}</small></td>
+                    <td class="text-center">{{ s.automaten|length }}</td>
+                    <td class="text-right">
+                        <a href="{{ url_for('standort_detail', sid=s.id) }}" class="btn btn-secondary btn-sm">Details →</a>
+                        {% if current_user.is_admin %}
+                        <form method="POST" action="{{ url_for('standort_loeschen', sid=s.id) }}" style="display:inline" onsubmit="return confirm('Standort „{{ s.name }}" mit allen Automaten und Feedbacks wirklich löschen?');">
+                            <button class="btn btn-danger btn-sm" type="submit">🗑️</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color: var(--fom-gray-600);">Noch keine Standorte angelegt.</p>
+    {% endif %}
+</div>
+{% endblock %}

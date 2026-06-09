@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Feedbacks – {{ automat.bezeichnung }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+    <h2>💬 Feedbacks – {{ automat.standort.name }} / {{ automat.bezeichnung }}</h2>
+    <div class="toolbar-right">
+        <a href="{{ url_for('standort_detail', sid=automat.standort_id) }}" class="btn btn-secondary btn-sm">← Zurück</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Alle Bewertungen ({{ feedbacks|length }})</h2>
+    {% if feedbacks %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Wann</th>
+                    <th class="text-center">Bewertung</th>
+                    <th>Kategorien</th>
+                    <th>Kommentar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in feedbacks %}
+                <tr>
+                    <td><small>{{ f.created_at|dt }}</small></td>
+                    <td class="text-center" style="font-size:22px; white-space:nowrap;">{{ f.bewertung_emoji }} <small style="font-size:12px; color:#666;">{{ f.bewertung }}/5</small></td>
+                    <td>{% for k in f.kategorie_liste %}<span class="badge badge-muted">{{ k }}</span> {% endfor %}</td>
+                    <td>{{ f.kommentar or '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p style="color: var(--fom-gray-600);">Noch kein Feedback für diesen Automaten.</p>
+    {% endif %}
+</div>
+{% endblock %}

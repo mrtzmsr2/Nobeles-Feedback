@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Ticket #{{ ticket.id }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+    <h2>🛠️ Ticket #{{ ticket.id }}</h2>
+    <div class="toolbar-right">
+        <a href="{{ url_for('tickets_liste') }}" class="btn btn-secondary btn-sm">← Alle Tickets</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Details</h2>
+    <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+        <div>
+            <strong>Standort:</strong> {{ ticket.automat.standort.name }}<br>
+            <strong>Automat:</strong> {{ ticket.automat.bezeichnung }}{% if ticket.automat.modell %} ({{ ticket.automat.modell }}){% endif %}<br>
+            <strong>Erstellt:</strong> {{ ticket.created_at|dt }}
+            {% if ticket.erstellt_von_email %}<br><strong>Gemeldet von:</strong> {{ ticket.erstellt_von_email }}{% endif %}
+        </div>
+        <div>
+            <strong>Status:</strong>
+            {% if ticket.status == 'offen' %}<span class="badge badge-warning">🆕 Offen</span>
+            {% elif ticket.status == 'in_bearbeitung' %}<span class="badge badge-info">⚙️ In Bearbeitung</span>
+            {% else %}<span class="badge badge-success">✅ Erledigt</span>{% endif %}<br>
+            <strong>Priorität:</strong>
+            {% if ticket.prioritaet == 'hoch' %}<span class="badge badge-danger">🔴 Hoch</span>
+            {% elif ticket.prioritaet == 'niedrig' %}<span class="badge badge-muted">🟢 Niedrig</span>
+            {% else %}<span class="badge badge-warning">🟡 Normal</span>{% endif %}<br>
+            {% if ticket.closed_at %}<strong>Erledigt am:</strong> {{ ticket.closed_at|dt }}<br>{% endif %}
+            {% if ticket.bearbeiter %}<strong>Bearbeiter:</strong> {{ ticket.bearbeiter.name }}{% endif %}
+        </div>
+    </div>
+    <hr style="margin: 16px 0; border: none; border-top: 1px solid #eee;">
+    <p><strong>Beschreibung:</strong></p>
+    <p style="background:#f4f6f8; padding:12px; border-radius:6px; white-space:pre-wrap;">{{ ticket.beschreibung }}</p>
+
+    {% if ticket.foto_pfad %}
+    <p style="margin-top:14px;"><strong>Foto:</strong></p>
+    <a href="{{ url_for('static', filename=ticket.foto_pfad) }}" target="_blank">
+        <img src="{{ url_for('static', filename=ticket.foto_pfad) }}" alt="Foto" style="max-width: 360px; max-height: 360px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.1); margin-top:8px;">
+    </a>
+    {% endif %}
+
+    {% if ticket.notiz %}
+    <p style="margin-top:14px;"><strong>Interne Notiz:</strong></p>
+    <p style="background:#fff3cd; padding:12px; border-radius:6px; white-space:pre-wrap;">{{ ticket.notiz }}</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>✏️ Bearbeiten</h2>
+    <form method="POST">
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="offen" {% if ticket.status=='offen' %}selected{% endif %}>🆕 Offen</option>
+                    <option value="in_bearbeitung" {% if ticket.status=='in_bearbeitung' %}selected{% endif %}>⚙️ In Bearbeitung</option>
+                    <option value="erledigt" {% if ticket.status=='erledigt' %}selected{% endif %}>✅ Erledigt</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Priorität</label>
+                <select name="prioritaet">
+                    <option value="niedrig" {% if ticket.prioritaet=='niedrig' %}selected{% endif %}>🟢 Niedrig</option>
+                    <option value="normal" {% if ticket.prioritaet=='normal' %}selected{% endif %}>🟡 Normal</option>
+                    <option value="hoch" {% if ticket.prioritaet=='hoch' %}selected{% endif %}>🔴 Hoch</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Notiz hinzufügen / ersetzen</label>
+            <textarea name="notiz" placeholder="Interne Notiz, z.B. Lieferant kontaktiert, Ersatzteil bestellt...">{{ ticket.notiz or '' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">💾 Speichern</button>
+    </form>
+</div>
+{% endblock %}

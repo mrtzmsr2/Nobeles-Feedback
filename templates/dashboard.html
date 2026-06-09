@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="toolbar">
+    <h2>📊 Übersicht</h2>
+    <div class="toolbar-right">
+        <a href="{{ url_for('standorte_liste') }}" class="btn btn-secondary btn-sm">🏢 Standorte</a>
+        <a href="{{ url_for('tickets_liste') }}" class="btn btn-secondary btn-sm">🛠️ Tickets</a>
+    </div>
+</div>
+
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="summary-icon">📝</div>
+        <div class="summary-content">
+            <div class="label">Feedback gesamt</div>
+            <div class="value">{{ gesamt.feedback }}</div>
+            <div class="sub">{{ gesamt.feedback_30 }} in den letzten 30 Tagen</div>
+        </div>
+    </div>
+    <div class="summary-card" style="border-left-color: #ffb400;">
+        <div class="summary-icon" style="background: #ffb400;">⭐</div>
+        <div class="summary-content">
+            <div class="label">Durchschnitt</div>
+            <div class="value">{% if gesamt.avg %}{{ gesamt.avg }} / 5{% else %}—{% endif %}</div>
+            <div class="sub">
+                {% if gesamt.avg %}
+                    {% set whole = gesamt.avg|round(0,'floor')|int %}
+                    <span class="stars">{% for _ in range(whole) %}★{% endfor %}<span class="empty">{% for _ in range(5-whole) %}★{% endfor %}</span></span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="summary-card" style="border-left-color: #e67e22;">
+        <div class="summary-icon" style="background: #e67e22;">🛠️</div>
+        <div class="summary-content">
+            <div class="label">Offene Tickets</div>
+            <div class="value">{{ gesamt.tickets_offen }}</div>
+            <div class="sub">in Bearbeitung oder neu</div>
+        </div>
+    </div>
+    <div class="summary-card" style="border-left-color: #5c6bc0;">
+        <div class="summary-icon" style="background: #5c6bc0;">🏢</div>
+        <div class="summary-content">
+            <div class="label">Standorte</div>
+            <div class="value">{{ standort_stats|length }}</div>
+            <div class="sub">mit Ø-Bewertung &amp; Trend</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>🏢 Standorte</h2>
+    {% if standort_stats %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Standort</th>
+                    <th class="text-center">Automaten</th>
+                    <th class="text-center">Ø Bewertung</th>
+                    <th class="text-right">Feedback (30 T.)</th>
+                    <th class="text-right">Feedback gesamt</th>
+                    <th class="text-center">Offene Tickets</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in standort_stats %}
+                <tr>
+                    <td><strong>{{ row.standort.name }}</strong>{% if row.standort.region %} <small style="color:#999">· {{ row.standort.region }}</small>{% endif %}</td>
+                    <td class="text-center">{{ row.anzahl_automaten }}</td>
+                    <td class="text-center">
+                        {% if row.durchschnitt %}
+                            <strong>{{ row.durchschnitt }}</strong>
+                            {% set w = row.durchschnitt|round(0,'floor')|int %}
+                            <span class="stars" style="font-size:13px;">{% for _ in range(w) %}★{% endfor %}<span class="empty">{% for _ in range(5-w) %}★{% endfor %}</span></span>
+                        {% else %}<span style="color:#bbb">—</span>{% endif %}
+                    </td>
+                    <td class="text-right">{{ row.anzahl_30 }}</td>
+                    <td class="text-right">{{ row.anzahl_gesamt }}</td>
+                    <td class="text-center">
+                        {% if row.offene_tickets %}<span class="badge badge-warning">⚠️ {{ row.offene_tickets }}</span>
+                        {% else %}<span class="badge badge-success">✓ 0</span>{% endif %}
+                    </td>
+                    <td class="text-right"><a href="{{ url_for('standort_detail', sid=row.standort.id) }}" class="btn btn-secondary btn-sm">Details →</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p style="color: var(--fom-gray-600);">Noch keine Standorte vorhanden.
+        {% if current_user.is_admin %}<a href="{{ url_for('standorte_liste') }}">Jetzt anlegen →</a>{% endif %}</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>📬 Letzte Feedbacks</h2>
+    {% if letzte_feedbacks %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Wann</th>
+                    <th>Standort / Automat</th>
+                    <th class="text-center">Bewertung</th>
+                    <th>Kategorien</th>
+                    <th>Kommentar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in letzte_feedbacks %}
+                <tr>
+                    <td><small>{{ f.created_at|dt }}</small></td>
+                    <td>
+                        <strong>{{ f.automat.standort.name }}</strong><br>
+                        <small style="color:#666">{{ f.automat.bezeichnung }}</small>
+                    </td>
+                    <td class="text-center" style="font-size:20px;">{{ f.bewertung_emoji }}<br><small style="color:#666">{{ f.bewertung }}/5</small></td>
+                    <td>
+                        {% for k in f.kategorie_liste %}
+                        <span class="badge badge-muted">{{ k }}</span>
+                        {% endfor %}
+                    </td>
+                    <td><small>{{ f.kommentar or '—' }}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p style="color: var(--fom-gray-600);">Noch keine Feedbacks erhalten.</p>
+    {% endif %}
+</div>
+{% endblock %}

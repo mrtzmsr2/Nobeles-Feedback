@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nobeles Feedback{% endblock %} – BCW</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%2300bfb3'/%3E%3Ctext x='50' y='66' font-family='Arial' font-size='52' font-weight='900' fill='white' text-anchor='middle' letter-spacing='-2'%3E☕%3C/text%3E%3C/svg%3E">
+    <style>
+        /* ── BCW/FOM Design System ──────────────────────── */
+        :root {
+            --fom-primary: #00bfb3;
+            --fom-primary-dark: #008c82;
+            --fom-primary-light: #00d9cc;
+            --fom-primary-gradient: linear-gradient(135deg, #00d9cc 0%, #00bfb3 50%, #008c82 100%);
+            --fom-gray-50: #f4f6f8;
+            --fom-gray-100: #e5e5e5;
+            --fom-gray-200: #d0d0d0;
+            --fom-gray-300: #b0b0b0;
+            --fom-gray-400: #999999;
+            --fom-gray-600: #666666;
+            --fom-gray-900: #333333;
+            --fom-success-bg: #d4edda;
+            --fom-success-text: #155724;
+            --fom-error-bg: #f8d7da;
+            --fom-error-text: #721c24;
+            --fom-warning-bg: #fff3cd;
+            --fom-warning-text: #856404;
+            --fom-info-bg: #d1ecf1;
+            --fom-info-text: #0c5460;
+            --fom-shadow-sm: 0 2px 4px rgba(0,0,0,.08);
+            --fom-shadow-md: 0 4px 12px rgba(0,191,179,.12);
+            --fom-shadow-lg: 0 8px 24px rgba(0,191,179,.18);
+            --fom-radius-sm: 4px;
+            --fom-radius-md: 8px;
+            --fom-radius-lg: 16px;
+            --fom-radius-pill: 9999px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: var(--fom-gray-50);
+            color: var(--fom-gray-900);
+            font-size: 15px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ── Header ───────────────────────────── */
+        .header {
+            background: var(--fom-primary);
+            color: white;
+            padding: 18px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,.15);
+            border-bottom: 4px solid var(--fom-primary-dark);
+        }
+        .header .container { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .header h1 { font-size: 1.4rem; font-weight: 600; display: flex; align-items: center; gap: 12px; color: white; }
+        .header-icon { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(255,255,255,.2); border-radius: 8px; font-size: 20px; }
+        .header-nav { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+        .header-nav a { color: white; text-decoration: none; padding: 7px 14px; border-radius: var(--fom-radius-pill); font-size: 14px; font-weight: 500; transition: background .2s; }
+        .header-nav a:hover, .header-nav a.active { background: rgba(255,255,255,.2); }
+        .user-pill { background: rgba(255,255,255,.15); padding: 6px 12px; border-radius: var(--fom-radius-pill); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+
+        /* ── Container ─────────────────────────── */
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+        .content { padding: 24px 0; }
+
+        /* ── Cards ─────────────────────────────── */
+        .card {
+            background: white;
+            border-radius: var(--fom-radius-md);
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: var(--fom-shadow-md);
+            border-top: 3px solid var(--fom-primary);
+        }
+        .card h2 { color: var(--fom-primary); font-size: 1.2rem; margin-bottom: 14px; border-bottom: 2px solid var(--fom-primary-light); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .card h3 { color: var(--fom-primary-dark); font-size: 1rem; margin-bottom: 10px; }
+
+        /* ── Summen-Karten ─────────────────────── */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 22px; }
+        .summary-card { background: white; border-radius: var(--fom-radius-md); padding: 18px; box-shadow: var(--fom-shadow-sm); border-left: 4px solid var(--fom-primary); display: flex; align-items: center; gap: 14px; }
+        .summary-icon { width: 44px; height: 44px; border-radius: var(--fom-radius-md); background: var(--fom-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .summary-content .label { font-size: 12px; color: var(--fom-gray-600); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+        .summary-content .value { font-size: 1.6rem; font-weight: 700; color: var(--fom-gray-900); }
+        .summary-content .sub { font-size: 12px; color: var(--fom-gray-600); }
+
+        /* ── Buttons ───────────────────────────── */
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: var(--fom-radius-pill); font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; text-decoration: none; line-height: 1.4; }
+        .btn-primary { background: var(--fom-primary); color: white; }
+        .btn-primary:hover { background: var(--fom-primary-dark); transform: translateY(-1px); box-shadow: var(--fom-shadow-md); }
+        .btn-secondary { background: white; color: var(--fom-primary); border: 2px solid var(--fom-primary); padding: 7px 16px; }
+        .btn-secondary:hover { background: var(--fom-gray-50); }
+        .btn-danger { background: var(--fom-error-text); color: white; }
+        .btn-danger:hover { background: #5a171d; }
+        .btn-warning { background: #e67e22; color: white; }
+        .btn-sm { padding: 5px 12px; font-size: 13px; }
+
+        /* ── Forms ─────────────────────────────── */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 600; color: var(--fom-gray-900); margin-bottom: 6px; font-size: 14px; }
+        .form-group input[type="text"], .form-group input[type="email"], .form-group input[type="password"], .form-group input[type="number"], .form-group input[type="file"], .form-group select, .form-group textarea, .form-control {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--fom-gray-200); border-radius: var(--fom-radius-sm); font-size: 15px; font-family: inherit; transition: border-color .2s, box-shadow .2s; background: white;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus, .form-control:focus {
+            outline: none; border-color: var(--fom-primary); box-shadow: 0 0 0 3px rgba(0,191,179,.15);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        small.help { color: var(--fom-gray-600); font-size: 12px; }
+
+        /* ── Tabellen ──────────────────────────── */
+        .table-wrapper { overflow-x: auto; border-radius: var(--fom-radius-md); box-shadow: var(--fom-shadow-sm); background: white; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { background: var(--fom-primary); color: white; padding: 11px 13px; text-align: left; font-weight: 600; white-space: nowrap; }
+        td { padding: 10px 13px; border-bottom: 1px solid var(--fom-gray-100); vertical-align: middle; }
+        tr:hover { background: rgba(0,191,179,.04); }
+        tr:last-child td { border-bottom: none; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        /* ── Badges ────────────────────────────── */
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: var(--fom-radius-pill); font-size: 12px; font-weight: 600; }
+        .badge-success { background: var(--fom-success-bg); color: var(--fom-success-text); }
+        .badge-danger { background: var(--fom-error-bg); color: var(--fom-error-text); }
+        .badge-warning { background: var(--fom-warning-bg); color: var(--fom-warning-text); }
+        .badge-info { background: var(--fom-info-bg); color: var(--fom-info-text); }
+        .badge-muted { background: var(--fom-gray-100); color: var(--fom-gray-600); }
+
+        /* ── Alerts ────────────────────────────── */
+        .flash-messages { margin-bottom: 16px; }
+        .alert { padding: 13px 18px; border-radius: var(--fom-radius-sm); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-weight: 500; animation: fadeIn .3s; }
+        .alert-success { background: var(--fom-success-bg); color: var(--fom-success-text); border: 1px solid #c3e6cb; }
+        .alert-danger, .alert-error { background: var(--fom-error-bg); color: var(--fom-error-text); border: 1px solid #f5c6cb; }
+        .alert-warning { background: var(--fom-warning-bg); color: var(--fom-warning-text); border: 1px solid #ffeeba; }
+        .alert-info { background: var(--fom-info-bg); color: var(--fom-info-text); border: 1px solid #bee5eb; }
+
+        /* ── Toolbar ───────────────────────────── */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 12px; flex-wrap: wrap; }
+        .toolbar h2 { color: var(--fom-primary); margin: 0; border: none; padding: 0; font-size: 1.4rem; }
+        .toolbar-right { display: flex; gap: 8px; align-items: center; }
+
+        /* ── Sterne-Rating (Anzeige) ──────────── */
+        .stars { font-size: 18px; letter-spacing: 2px; color: #ffb400; }
+        .stars .empty { color: var(--fom-gray-200); }
+
+        /* ── Animationen ──────────────────────── */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn .3s; }
+
+        /* ── Responsive ───────────────────────── */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.1rem; }
+            .header-nav a { padding: 6px 10px; font-size: 13px; }
+            .card { padding: 16px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .summary-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        a { color: var(--fom-primary-dark); }
+        a:hover { color: var(--fom-primary); }
+
+        .footer { text-align: center; padding: 24px; color: var(--fom-gray-400); font-size: 12px; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<header class="header">
+    <div class="container">
+        <h1>
+            <span class="header-icon">☕</span>
+            Nobeles&nbsp;Feedback
+        </h1>
+        <nav class="header-nav">
+            <a href="{{ url_for('dashboard') }}" {% if request.endpoint=='dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
+            <a href="{{ url_for('standorte_liste') }}" {% if 'standort' in (request.endpoint or '') %}class="active"{% endif %}>🏢 Standorte</a>
+            <a href="{{ url_for('tickets_liste') }}" {% if 'ticket' in (request.endpoint or '') %}class="active"{% endif %}>🛠️ Tickets</a>
+            {% if current_user.is_admin %}
+            <a href="{{ url_for('benutzer_liste') }}" {% if 'benutzer' in (request.endpoint or '') %}class="active"{% endif %}>👥 Benutzer</a>
+            {% endif %}
+            <span class="user-pill">👤 {{ current_user.name }}{% if current_user.is_admin %} · Admin{% elif current_user.is_leiter %} · Leitung{% endif %}</span>
+            <a href="{{ url_for('logout') }}">🚪 Abmelden</a>
+        </nav>
+    </div>
+</header>
+{% endif %}
+
+<main class="container content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+            <span>{% if category=='success' %}✅{% elif category=='danger' or category=='error' %}❌{% elif category=='warning' %}⚠️{% else %}ℹ️{% endif %}</span>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    Nobeles Feedback · BCW-Gruppe · {{ now.year }}
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

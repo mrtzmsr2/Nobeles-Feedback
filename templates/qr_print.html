@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>QR-Sticker – {{ automat.standort.name }} / {{ automat.bezeichnung }}</title>
+<style>
+@page { size: A6 portrait; margin: 8mm; }
+body { font-family: 'Segoe UI', sans-serif; color: #222; }
+.sticker {
+    width: 80mm; padding: 8mm 6mm; text-align: center;
+    border: 2px dashed #00bfb3; border-radius: 8mm; background: white;
+    page-break-after: always;
+}
+.sticker h1 { font-size: 14pt; color: #00bfb3; margin-bottom: 4mm; }
+.sticker .standort { font-size: 11pt; font-weight: 700; margin-bottom: 1mm; }
+.sticker .automat { font-size: 10pt; color: #555; margin-bottom: 4mm; }
+.sticker .qr { margin: 4mm 0; }
+.sticker .qr img { width: 55mm; height: 55mm; }
+.sticker .cta { font-size: 10pt; font-weight: 700; color: #00bfb3; margin-top: 3mm; }
+.sticker .sub { font-size: 7pt; color: #999; margin-top: 2mm; word-break: break-all; }
+.toolbar { padding: 16px; background: #f4f6f8; text-align: center; }
+.toolbar button { padding: 10px 20px; background: #00bfb3; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+@media print { .toolbar { display: none; } body { background: white; } }
+</style>
+</head>
+<body>
+<div class="toolbar">
+    <button onclick="window.print()">🖨️ Drucken</button>
+    &nbsp; Tipp: Drucke 4× pro Standort und klebe Sticker an / neben den Automaten.
+</div>
+<div class="sticker">
+    <h1>☕ Wie war dein Kaffee?</h1>
+    <div class="standort">{{ automat.standort.name }}</div>
+    <div class="automat">{{ automat.bezeichnung }}</div>
+    <div class="qr"><img src="{{ url_for('automat_qr_png', aid=automat.id) }}" alt="QR-Code"></div>
+    <div class="cta">📱 Scan &amp; Feedback geben</div>
+    <div class="sub">{{ url }}</div>
+</div>
+</body>
+</html>

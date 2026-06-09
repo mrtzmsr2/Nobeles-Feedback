@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Feedback – {{ automat.standort.name }} / {{ automat.bezeichnung }}</title>
+<link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%2300bfb3'/%3E%3Ctext x='50' y='66' font-family='Arial' font-size='52' font-weight='900' fill='white' text-anchor='middle'%3E☕%3C/text%3E%3C/svg%3E">
+<style>
+:root { --primary: #00bfb3; --primary-dark: #008c82; --primary-light: #00d9cc; --gray-50: #f4f6f8; --gray-200: #d0d0d0; --gray-600: #666; --gray-900: #333; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', -apple-system, sans-serif; background: linear-gradient(135deg, #00d9cc 0%, #00bfb3 50%, #008c82 100%); min-height: 100vh; color: var(--gray-900); padding: 16px; }
+.wrap { max-width: 480px; margin: 0 auto; }
+.head { text-align: center; color: white; padding: 24px 0 16px; }
+.head .logo { width: 64px; height: 64px; background: white; border-radius: 18px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+.head h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+.head .sub { opacity: .9; font-size: 14px; }
+.card { background: white; border-radius: 18px; padding: 22px; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+.flash { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+.flash.danger { background: #f8d7da; color: #721c24; }
+h2 { font-size: 1rem; color: var(--gray-900); margin-bottom: 10px; font-weight: 600; }
+.rating { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 24px; }
+.rating-opt { flex: 1; }
+.rating-opt input { display: none; }
+.rating-opt label {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 12px 4px; border: 2px solid var(--gray-200); border-radius: 12px;
+    cursor: pointer; transition: all .2s; background: white; user-select: none;
+}
+.rating-opt label .emo { font-size: 32px; line-height: 1; }
+.rating-opt label .lbl { font-size: 10px; color: var(--gray-600); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
+.rating-opt input:checked + label { border-color: var(--primary); background: rgba(0,191,179,.1); transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,191,179,.3); }
+.rating-opt label:hover { border-color: var(--primary-light); }
+.kategorien { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.kat { position: relative; }
+.kat input { position: absolute; opacity: 0; pointer-events: none; }
+.kat label {
+    display: inline-block; padding: 8px 14px; background: var(--gray-50);
+    border: 1.5px solid var(--gray-200); border-radius: 9999px;
+    font-size: 13px; cursor: pointer; transition: all .15s; user-select: none;
+}
+.kat input:checked + label { background: var(--primary); color: white; border-color: var(--primary); }
+.kat label:hover { border-color: var(--primary); }
+textarea { width: 100%; padding: 12px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-family: inherit; font-size: 15px; resize: vertical; min-height: 80px; }
+textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,191,179,.15); }
+.btn-send {
+    width: 100%; padding: 14px; margin-top: 18px; background: var(--primary);
+    color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: all .2s; box-shadow: 0 4px 12px rgba(0,191,179,.3);
+}
+.btn-send:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,191,179,.4); }
+.btn-send:disabled { opacity: .6; cursor: not-allowed; }
+.standort-info { text-align: center; padding: 10px; background: var(--gray-50); border-radius: 10px; margin-bottom: 18px; font-size: 13px; color: var(--gray-600); }
+.standort-info strong { color: var(--gray-900); display: block; font-size: 15px; }
+.privacy { text-align: center; color: white; opacity: .85; font-size: 12px; margin-top: 18px; padding: 0 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="head">
+        <div class="logo">☕</div>
+        <h1>Wie war dein Kaffee?</h1>
+        <p class="sub">Dein Feedback hilft uns, besser zu werden</p>
+    </div>
+
+    <div class="card">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, msg in messages %}
+            <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+        {% endwith %}
+
+        <div class="standort-info">
+            📍 <strong>{{ automat.standort.name }}</strong>
+            {{ automat.bezeichnung }}{% if automat.modell %} · {{ automat.modell }}{% endif %}
+        </div>
+
+        <form method="POST" id="fbForm">
+            <h2>1. Deine Bewertung *</h2>
+            <div class="rating">
+                {% for val, emo, lbl in [(1,'😡','Schlecht'),(2,'🙁','Mau'),(3,'😐','Ok'),(4,'🙂','Gut'),(5,'😍','Top')] %}
+                <div class="rating-opt">
+                    <input type="radio" name="bewertung" id="b{{ val }}" value="{{ val }}" required>
+                    <label for="b{{ val }}">
+                        <span class="emo">{{ emo }}</span>
+                        <span class="lbl">{{ lbl }}</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h2>2. Was war's? <small style="color:#999;font-weight:normal;">(optional, mehrfach)</small></h2>
+            <div class="kategorien">
+                {% for key, label in KATEGORIEN_VERFUEGBAR %}
+                <div class="kat">
+                    <input type="checkbox" name="kategorien" id="k_{{ key }}" value="{{ key }}">
+                    <label for="k_{{ key }}">{{ label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h2>3. Kommentar <small style="color:#999;font-weight:normal;">(optional)</small></h2>
+            <textarea name="kommentar" maxlength="2000" placeholder="z.B. Bohnen leer, Tropfschale voll, Lieblingsgetränk fehlt..."></textarea>
+
+            <button type="submit" class="btn-send">📤 Feedback senden</button>
+        </form>
+    </div>
+
+    <p class="privacy">
+        🔒 Anonym · Keine personenbezogenen Daten gespeichert<br>
+        Nobeles Feedback · BCW-Gruppe
+    </p>
+</div>
+<script>
+document.getElementById('fbForm').addEventListener('submit', function(e) {
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true;
+    btn.textContent = '⏳ Wird gesendet...';
+});
+</script>
+</body>
+</html>

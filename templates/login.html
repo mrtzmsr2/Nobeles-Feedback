@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Anmelden{% endblock %}
+{% block content %}
+<div style="max-width: 420px; margin: 40px auto;">
+    <div class="card" style="border-top-width: 4px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 64px; height: 64px; background: var(--fom-primary); border-radius: 16px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 32px;">☕</div>
+            <h2 style="border: none; padding: 0; justify-content: center;">Nobeles Feedback</h2>
+            <p style="color: var(--fom-gray-600); font-size: 14px; margin-top: 4px;">Mitarbeiter-Feedback Kaffeeautomaten</p>
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="email">📧 E-Mail</label>
+                <input type="email" id="email" name="email" autocomplete="username" required autofocus
+                       placeholder="vorname.nachname@bcw-gruppe.de">
+            </div>
+            <div class="form-group">
+                <label for="password">🔒 Passwort</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">
+                Anmelden →
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 16px; font-size: 13px;">
+            <a href="{{ url_for('registrieren') }}">Noch kein Konto? Registrieren</a>
+        </div>
+    </div>
+    <p style="text-align: center; color: var(--fom-gray-600); font-size: 12px; margin-top: 8px;">
+        Login nur für Mitarbeitende der BCW-Gruppe ({{ ALLOWED_EMAIL_DOMAINS|join(', ') }})
+    </p>
+</div>
+
+{# Header für anonyme Seiten manuell #}
+<style>body { background: linear-gradient(135deg, #00bfb3 0%, #008c82 100%); }</style>
+{% endblock %}
