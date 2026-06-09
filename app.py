@@ -7,7 +7,6 @@ from __future__ import annotations
 import io
 import os
 import re
-import uuid
 from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
@@ -18,12 +17,10 @@ from flask import (
     Flask,
     abort,
     flash,
-    jsonify,
     redirect,
     render_template,
     request,
     send_file,
-    send_from_directory,
     url_for,
 )
 from flask_login import (
@@ -34,25 +31,20 @@ from flask_login import (
     logout_user,
 )
 from sqlalchemy import func
-from werkzeug.utils import secure_filename
 
-from models import Automat, Feedback, Standort, Ticket, User, db
+from models import Automat, Feedback, Standort, User, db
 
 # ── Konfiguration ───────────────────────────────────────────
 load_dotenv()
 BASE_DIR = Path(__file__).parent.resolve()
 INSTANCE_DIR = BASE_DIR / "instance"
-UPLOAD_DIR = BASE_DIR / "static" / "uploads"
 INSTANCE_DIR.mkdir(exist_ok=True)
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_EMAIL_DOMAINS = [
     d.strip().lower()
     for d in os.environ.get("ALLOWED_EMAIL_DOMAINS", "bcw-gruppe.de").split(",")
     if d.strip()
 ]
-MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "8"))
-ALLOWED_IMAGE_EXT = {"png", "jpg", "jpeg", "webp", "gif"}
 
 KATEGORIEN_VERFUEGBAR = [
     ("geschmack", "☕ Geschmack"),
@@ -60,7 +52,6 @@ KATEGORIEN_VERFUEGBAR = [
     ("verfuegbarkeit", "📦 Verfügbarkeit (leer / aufgefüllt)"),
     ("auswahl", "🎯 Auswahl"),
     ("temperatur", "🌡️ Temperatur"),
-    ("defekt", "⚠️ Defekt / Funktion"),
     ("bedienung", "🖐️ Bedienung"),
     ("sonstiges", "💬 Sonstiges"),
 ]
@@ -70,7 +61,6 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-please-change")
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{INSTANCE_DIR / 'nobeles_feedback.db'}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
 
 db.init_app(app)
 
@@ -213,27 +203,19 @@ def feedback_form(token: str):
 
         kategorien = request.form.getlist("kategorien")
         kategorien_str = ",".join(k for k in kategorien if k)
-        kommentar = (request.form.get("kommentar") or "").strip()[:2000]
+        was_gut = (request.form.get("was_gut") or "").strip()[:2000]
+        was_schlecht = (request.form.get("was_schlecht") or "").strip()[:2000]
+        verbesserung = (request.form.get("verbesserung") or "").strip()[:2000]
 
         fb = Feedback(
             automat_id=automat.id,
             bewertung=bewertung,
             kategorien=kategorien_str or None,
-            kommentar=kommentar or None,
+            was_gut=was_gut or None,
+            was_schlecht=was_schlecht or None,
+            verbesserung=verbesserung or None,
         )
         db.session.add(fb)
-
-        # Optional: Defekt-Ticket gleich mit anlegen
-        if "defekt" in kategorien:
-            beschr = kommentar or "Defekt gemeldet via Feedback-Formular"
-            t = Ticket(
-                automat_id=automat.id,
-                beschreibung=beschr,
-                status="offen",
-                prioritaet="normal" if bewertung >= 2 else "hoch",
-            )
-            db.session.add(t)
-
         db.session.commit()
         return redirect(url_for("feedback_thanks", token=token))
 
@@ -332,8 +314,14 @@ def dashboard():
         durchschnitt = db.session.query(func.avg(Feedback.bewertung)).filter(
             Feedback.automat_id.in_(automat_ids)
         ).scalar()
-        offene_tickets = Ticket.query.filter(
-            Ticket.automat_id.in_(automat_ids), Ticket.status != "erledigt"
+        # Anzahl Feedbacks mit ausgefülltem Text in den letzten 30 Tagen
+        mit_text_30 = q.filter(
+            Feedback.created_at >= seit,
+            db.or_(
+                Feedback.was_gut.isnot(None),
+                Feedback.was_schlecht.isnot(None),
+                Feedback.verbesserung.isnot(None),
+            ),
         ).count()
         standort_stats.append(
             {
@@ -341,7 +329,7 @@ def dashboard():
                 "anzahl_gesamt": anzahl,
                 "anzahl_30": anzahl_30,
                 "durchschnitt": round(durchschnitt, 2) if durchschnitt else None,
-                "offene_tickets": offene_tickets,
+                "mit_text_30": mit_text_30,
                 "anzahl_automaten": len(automat_ids),
             }
         )
@@ -351,7 +339,6 @@ def dashboard():
         gesamt_feedback = Feedback.query.count()
         gesamt_feedback_30 = Feedback.query.filter(Feedback.created_at >= seit).count()
         gesamt_avg = db.session.query(func.avg(Feedback.bewertung)).scalar()
-        gesamt_tickets_offen = Ticket.query.filter(Ticket.status != "erledigt").count()
     else:
         ids = [a.id for s in standorte for a in s.automaten]
         gesamt_feedback = Feedback.query.filter(Feedback.automat_id.in_(ids)).count()
@@ -365,9 +352,6 @@ def dashboard():
             .filter(Feedback.automat_id.in_(ids))
             .scalar()
         )
-        gesamt_tickets_offen = Ticket.query.filter(
-            Ticket.automat_id.in_(ids), Ticket.status != "erledigt"
-        ).count()
 
     # Letzte Feedbacks
     letzte_q = Feedback.query
@@ -383,7 +367,6 @@ def dashboard():
             "feedback": gesamt_feedback,
             "feedback_30": gesamt_feedback_30,
             "avg": round(gesamt_avg, 2) if gesamt_avg else None,
-            "tickets_offen": gesamt_tickets_offen,
         },
         letzte_feedbacks=letzte_feedbacks,
     )
@@ -448,14 +431,12 @@ def standort_detail(sid: int):
         anzahl_30 = Feedback.query.filter_by(automat_id=a.id).filter(
             Feedback.created_at >= seit
         ).count()
-        offen = Ticket.query.filter_by(automat_id=a.id).filter(Ticket.status != "erledigt").count()
         automaten_data.append(
             {
                 "automat": a,
                 "avg": round(avg, 2) if avg else None,
                 "anzahl": anzahl,
                 "anzahl_30": anzahl_30,
-                "offene_tickets": offen,
             }
         )
 
@@ -539,86 +520,6 @@ def automat_qr_print(aid: int):
 
 
 # ════════════════════════════════════════════════════════════
-# Tickets
-# ════════════════════════════════════════════════════════════
-@app.route("/tickets")
-@login_required
-def tickets_liste():
-    q = Ticket.query
-    if not current_user.is_admin:
-        ids = [a.id for s in visible_standorte() for a in s.automaten]
-        q = q.filter(Ticket.automat_id.in_(ids))
-    status = request.args.get("status", "offen")
-    if status in {"offen", "in_bearbeitung", "erledigt"}:
-        q = q.filter_by(status=status)
-    tickets = q.order_by(Ticket.created_at.desc()).all()
-    return render_template("tickets.html", tickets=tickets, status_filter=status)
-
-
-@app.route("/tickets/<int:tid>", methods=["GET", "POST"])
-@staff_required
-def ticket_detail(tid: int):
-    t = db.session.get(Ticket, tid) or abort(404)
-    if not standort_zugriff(t.automat.standort_id):
-        abort(403)
-
-    if request.method == "POST":
-        neuer_status = request.form.get("status")
-        if neuer_status in {"offen", "in_bearbeitung", "erledigt"}:
-            t.status = neuer_status
-            if neuer_status == "erledigt" and not t.closed_at:
-                t.closed_at = datetime.utcnow()
-            if neuer_status != "erledigt":
-                t.closed_at = None
-        t.prioritaet = request.form.get("prioritaet", t.prioritaet)
-        notiz = (request.form.get("notiz") or "").strip()
-        if notiz:
-            t.notiz = notiz
-        t.bearbeiter_id = current_user.id
-        db.session.commit()
-        flash("Ticket aktualisiert.", "success")
-        return redirect(url_for("ticket_detail", tid=tid))
-
-    return render_template("ticket_detail.html", ticket=t)
-
-
-@app.route("/automat/<int:aid>/ticket/neu", methods=["POST"])
-@staff_required
-def ticket_neu(aid: int):
-    a = db.session.get(Automat, aid) or abort(404)
-    if not standort_zugriff(a.standort_id):
-        abort(403)
-    beschreibung = (request.form.get("beschreibung") or "").strip()
-    if not beschreibung:
-        flash("Bitte Beschreibung angeben.", "danger")
-        return redirect(url_for("standort_detail", sid=a.standort_id))
-
-    foto_pfad = None
-    file = request.files.get("foto")
-    if file and file.filename:
-        ext = file.filename.rsplit(".", 1)[-1].lower()
-        if ext not in ALLOWED_IMAGE_EXT:
-            flash("Nur Bilder (PNG/JPG/WEBP/GIF) erlaubt.", "danger")
-            return redirect(url_for("standort_detail", sid=a.standort_id))
-        fname = f"{uuid.uuid4().hex}.{ext}"
-        target = UPLOAD_DIR / fname
-        file.save(target)
-        foto_pfad = f"uploads/{fname}"
-
-    t = Ticket(
-        automat_id=aid,
-        beschreibung=beschreibung,
-        foto_pfad=foto_pfad,
-        prioritaet=request.form.get("prioritaet", "normal"),
-        erstellt_von_email=current_user.email,
-    )
-    db.session.add(t)
-    db.session.commit()
-    flash("Ticket angelegt.", "success")
-    return redirect(url_for("ticket_detail", tid=t.id))
-
-
-# ════════════════════════════════════════════════════════════
 # Benutzerverwaltung (nur Admin)
 # ════════════════════════════════════════════════════════════
 @app.route("/benutzer")
@@ -672,15 +573,7 @@ def benutzer_loeschen(uid: int):
 
 
 # ════════════════════════════════════════════════════════════
-# Statische Uploads (Tickets)
-# ════════════════════════════════════════════════════════════
-@app.route("/uploads/<path:filename>")
-@login_required
-def uploads(filename: str):
-    return send_from_directory(UPLOAD_DIR, filename)
 
-
-# ════════════════════════════════════════════════════════════
 # Fehler-Handler
 # ════════════════════════════════════════════════════════════
 @app.errorhandler(403)

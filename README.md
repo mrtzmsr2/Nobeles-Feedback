@@ -3,14 +3,19 @@
 **Mitarbeiter-Feedback-System für Kaffeeautomaten an den Standorten der BCW-Gruppe.**
 
 Eine schlanke Flask-Webanwendung im BCW/FOM-Design, mit der die Zentrale aus
-Feedback aller Standorte einsammeln, auswerten und Defekte als Tickets nachverfolgen kann.
+strukturiertes Feedback (was gut läuft, was schlecht läuft, Verbesserungspotenzial)
+von allen Standorten einsammeln und auswerten kann.
+
+> Hinweis: Dies ist **kein Ticketsystem** — Defekte/Störungen werden im bestehenden
+> BCW-Ticketsystem weiterverarbeitet. Diese App fokussiert sich rein auf strukturiertes
+> Mitarbeiter-Feedback.
 
 ## ✨ Features
 
-- 📱 **QR-Code-Feedback ohne Login** — Mitarbeiter scannen den QR-Sticker am Automaten und geben in unter 10 Sekunden Feedback (Emoji-Bewertung 1–5, Kategorien, optionaler Kommentar)
+- 📱 **QR-Code-Feedback ohne Login** — Mitarbeiter scannen den QR-Sticker am Automaten und geben in unter 30 Sekunden Feedback
+- 📝 **Strukturierter Feedback-Bogen** — Emoji-Bewertung 1–5, Kategorien-Chips und drei optionale Textfelder: ✅ Was läuft gut · ❌ Was läuft schlecht · 💡 Verbesserungspotenzial
 - 🏢 **Standort- und Automaten-Verwaltung** — Zentrale legt Standorte und Automaten an, generiert druckbare A6-QR-Sticker
-- 📊 **Dashboard mit Ø-Bewertungen und 30-Tage-Trend** je Standort/Automat
-- 🛠️ **Defekt-Tickets** mit Foto-Upload, Status, Priorität und Bearbeiter-Notizen — werden bei Kategorie "Defekt" im Feedback automatisch angelegt
+- 📊 **Dashboard mit Ø-Bewertungen und 30-Tage-Trend** je Standort/Automat sowie Anzeige der ausgefüllten Textbeiträge
 - 👥 **Rollen-System**: Admin (alles), Standortleitung (eigener Standort), Viewer (nur lesen)
 - 🔒 **Auth**: E-Mail + Passwort, **Registrierung nur mit `@bcw-gruppe.de`-Adressen**, Admin muss neue Konten freischalten
 - 🎨 **Design**: identisches FOM/BCW-CSS-System wie Fuhrpark/Immomanagement (Primary `#00bfb3`)
@@ -84,26 +89,22 @@ pm2 restart nobeles-feedback
 ```
 Nobeles-Feedback/
 ├── app.py              # Flask-Anwendung (Routes)
-├── models.py           # SQLAlchemy-Modelle (User, Standort, Automat, Feedback, Ticket)
+├── models.py           # SQLAlchemy-Modelle (User, Standort, Automat, Feedback)
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
 ├── instance/
 │   └── nobeles_feedback.db   # SQLite (wird automatisch erzeugt)
-├── static/
-│   └── uploads/        # Ticket-Foto-Uploads
 └── templates/
     ├── base.html
     ├── login.html
     ├── registrieren.html
     ├── dashboard.html
-    ├── feedback.html              # öffentlich, QR-Landing
+    ├── feedback.html              # öffentlich, QR-Landing (3-Felder-Bogen)
     ├── feedback_thanks.html
     ├── standorte.html
     ├── standort_detail.html
     ├── automat_feedbacks.html
-    ├── tickets.html
-    ├── ticket_detail.html
     ├── benutzer.html
     ├── qr_print.html              # druckbares QR-Sticker-Layout (A6)
     └── error.html
@@ -120,14 +121,14 @@ und `fom-immobilienmanagement`. Primärfarbe `#00bfb3` (Teal).
 - Passwörter mit `werkzeug.security` (PBKDF2-SHA256) gehasht
 - Registrierung domain-restricted (`ALLOWED_EMAIL_DOMAINS` in `.env`)
 - Neue Konten standardmäßig deaktiviert — Admin schaltet manuell frei
-- Datei-Uploads auf 8 MB begrenzt, nur PNG/JPG/WEBP/GIF erlaubt
+- Textfelder serverseitig auf 2000 Zeichen begrenzt
 - CSRF: Form-POSTs sind durch Session-Cookies geschützt; für Produktion ggf. `Flask-WTF` ergänzen
 
 ## 🛣️ Roadmap (Phase 2)
 
 - [ ] E-Mail-Benachrichtigung an Standortleitung bei mehreren negativen Bewertungen in Folge
-- [ ] Wartungs-Log und Service-Intervalle pro Automat
 - [ ] CSV-Export der Feedbacks
+- [ ] Stichwort-Cloud / Sentiment-Analyse der Texte
 - [ ] LDAP-Integration gegen `bcw-intern.local` (analog Fuhrpark) — Selbst-Registrierung ablösen
 - [ ] Teams-Tab-Wrapper (iframe-Manifest für Microsoft Teams)
 - [ ] Mehrsprachig (DE/EN)

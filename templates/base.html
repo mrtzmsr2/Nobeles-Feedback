@@ -178,7 +178,6 @@
         <nav class="header-nav">
             <a href="{{ url_for('dashboard') }}" {% if request.endpoint=='dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
             <a href="{{ url_for('standorte_liste') }}" {% if 'standort' in (request.endpoint or '') %}class="active"{% endif %}>🏢 Standorte</a>
-            <a href="{{ url_for('tickets_liste') }}" {% if 'ticket' in (request.endpoint or '') %}class="active"{% endif %}>🛠️ Tickets</a>
             {% if current_user.is_admin %}
             <a href="{{ url_for('benutzer_liste') }}" {% if 'benutzer' in (request.endpoint or '') %}class="active"{% endif %}>👥 Benutzer</a>
             {% endif %}

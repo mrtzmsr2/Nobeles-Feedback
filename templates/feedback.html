@@ -7,52 +7,50 @@
 <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%2300bfb3'/%3E%3Ctext x='50' y='66' font-family='Arial' font-size='52' font-weight='900' fill='white' text-anchor='middle'%3E☕%3C/text%3E%3C/svg%3E">
 <style>
-:root { --primary: #00bfb3; --primary-dark: #008c82; --primary-light: #00d9cc; --gray-50: #f4f6f8; --gray-200: #d0d0d0; --gray-600: #666; --gray-900: #333; }
+:root { --primary: #00bfb3; --primary-dark: #008c82; --primary-light: #00d9cc; --gray-50: #f4f6f8; --gray-200: #d0d0d0; --gray-600: #666; --gray-900: #333; --green: #2e7d32; --red: #c62828; --orange: #e67e22; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', -apple-system, sans-serif; background: linear-gradient(135deg, #00d9cc 0%, #00bfb3 50%, #008c82 100%); min-height: 100vh; color: var(--gray-900); padding: 16px; }
-.wrap { max-width: 480px; margin: 0 auto; }
-.head { text-align: center; color: white; padding: 24px 0 16px; }
-.head .logo { width: 64px; height: 64px; background: white; border-radius: 18px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
-.head h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+.wrap { max-width: 520px; margin: 0 auto; }
+.head { text-align: center; color: white; padding: 20px 0 16px; }
+.head .logo { width: 60px; height: 60px; background: white; border-radius: 16px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+.head h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
 .head .sub { opacity: .9; font-size: 14px; }
 .card { background: white; border-radius: 18px; padding: 22px; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
 .flash { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
 .flash.danger { background: #f8d7da; color: #721c24; }
-h2 { font-size: 1rem; color: var(--gray-900); margin-bottom: 10px; font-weight: 600; }
-.rating { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 24px; }
+h2 { font-size: .95rem; color: var(--gray-900); margin-bottom: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+h2 .step { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: var(--primary); color: white; border-radius: 50%; font-size: 12px; font-weight: 700; }
+.standort-info { text-align: center; padding: 10px; background: var(--gray-50); border-radius: 10px; margin-bottom: 18px; font-size: 13px; color: var(--gray-600); }
+.standort-info strong { color: var(--gray-900); display: block; font-size: 15px; }
+.rating { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 22px; }
 .rating-opt { flex: 1; }
 .rating-opt input { display: none; }
-.rating-opt label {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 12px 4px; border: 2px solid var(--gray-200); border-radius: 12px;
-    cursor: pointer; transition: all .2s; background: white; user-select: none;
-}
-.rating-opt label .emo { font-size: 32px; line-height: 1; }
+.rating-opt label { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; border: 2px solid var(--gray-200); border-radius: 12px; cursor: pointer; transition: all .2s; background: white; user-select: none; }
+.rating-opt label .emo { font-size: 30px; line-height: 1; }
 .rating-opt label .lbl { font-size: 10px; color: var(--gray-600); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
 .rating-opt input:checked + label { border-color: var(--primary); background: rgba(0,191,179,.1); transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,191,179,.3); }
 .rating-opt label:hover { border-color: var(--primary-light); }
-.kategorien { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.kategorien { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
 .kat { position: relative; }
 .kat input { position: absolute; opacity: 0; pointer-events: none; }
-.kat label {
-    display: inline-block; padding: 8px 14px; background: var(--gray-50);
-    border: 1.5px solid var(--gray-200); border-radius: 9999px;
-    font-size: 13px; cursor: pointer; transition: all .15s; user-select: none;
-}
+.kat label { display: inline-block; padding: 7px 13px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 9999px; font-size: 13px; cursor: pointer; transition: all .15s; user-select: none; }
 .kat input:checked + label { background: var(--primary); color: white; border-color: var(--primary); }
 .kat label:hover { border-color: var(--primary); }
-textarea { width: 100%; padding: 12px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-family: inherit; font-size: 15px; resize: vertical; min-height: 80px; }
+.feld { margin-bottom: 14px; padding: 10px 14px; border-left: 3px solid; border-radius: 0 6px 6px 0; }
+.feld.gut { border-color: var(--green); background: rgba(46,125,50,.05); }
+.feld.schlecht { border-color: var(--red); background: rgba(198,40,40,.05); }
+.feld.idee { border-color: var(--orange); background: rgba(230,126,34,.05); }
+.feld-titel { font-size: 14px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.feld.gut .feld-titel { color: var(--green); }
+.feld.schlecht .feld-titel { color: var(--red); }
+.feld.idee .feld-titel { color: var(--orange); }
+textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical; min-height: 56px; background: white; }
 textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,191,179,.15); }
-.btn-send {
-    width: 100%; padding: 14px; margin-top: 18px; background: var(--primary);
-    color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
-    cursor: pointer; transition: all .2s; box-shadow: 0 4px 12px rgba(0,191,179,.3);
-}
+.btn-send { width: 100%; padding: 14px; margin-top: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all .2s; box-shadow: 0 4px 12px rgba(0,191,179,.3); }
 .btn-send:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,191,179,.4); }
 .btn-send:disabled { opacity: .6; cursor: not-allowed; }
-.standort-info { text-align: center; padding: 10px; background: var(--gray-50); border-radius: 10px; margin-bottom: 18px; font-size: 13px; color: var(--gray-600); }
-.standort-info strong { color: var(--gray-900); display: block; font-size: 15px; }
 .privacy { text-align: center; color: white; opacity: .85; font-size: 12px; margin-top: 18px; padding: 0 12px; }
+.optional { color: #999; font-weight: normal; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -76,7 +74,7 @@ textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 
         </div>
 
         <form method="POST" id="fbForm">
-            <h2>1. Deine Bewertung *</h2>
+            <h2><span class="step">1</span> Deine Bewertung *</h2>
             <div class="rating">
                 {% for val, emo, lbl in [(1,'😡','Schlecht'),(2,'🙁','Mau'),(3,'😐','Ok'),(4,'🙂','Gut'),(5,'😍','Top')] %}
                 <div class="rating-opt">
@@ -89,7 +87,7 @@ textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 
                 {% endfor %}
             </div>
 
-            <h2>2. Was war's? <small style="color:#999;font-weight:normal;">(optional, mehrfach)</small></h2>
+            <h2><span class="step">2</span> Worum geht's? <span class="optional">(optional, mehrfach)</span></h2>
             <div class="kategorien">
                 {% for key, label in KATEGORIEN_VERFUEGBAR %}
                 <div class="kat">
@@ -99,8 +97,22 @@ textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 
                 {% endfor %}
             </div>
 
-            <h2>3. Kommentar <small style="color:#999;font-weight:normal;">(optional)</small></h2>
-            <textarea name="kommentar" maxlength="2000" placeholder="z.B. Bohnen leer, Tropfschale voll, Lieblingsgetränk fehlt..."></textarea>
+            <h2><span class="step">3</span> Dein Feedback <span class="optional">(alles optional)</span></h2>
+
+            <div class="feld gut">
+                <div class="feld-titel">✅ Was läuft gut?</div>
+                <textarea name="was_gut" maxlength="2000" placeholder="z.B. Cappuccino schmeckt super, immer sauber, große Auswahl..."></textarea>
+            </div>
+
+            <div class="feld schlecht">
+                <div class="feld-titel">❌ Was läuft schlecht?</div>
+                <textarea name="was_schlecht" maxlength="2000" placeholder="z.B. Bohnen oft leer, Milch zu kalt, Tropfschale voll..."></textarea>
+            </div>
+
+            <div class="feld idee">
+                <div class="feld-titel">💡 Verbesserungspotenzial / Idee</div>
+                <textarea name="verbesserung" maxlength="2000" placeholder="z.B. Hafermilch-Option, zweiter Automat im 2. OG, Reinigung freitags..."></textarea>
+            </div>
 
             <button type="submit" class="btn-send">📤 Feedback senden</button>
         </form>

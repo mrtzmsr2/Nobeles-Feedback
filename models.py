@@ -74,9 +74,6 @@ class Automat(db.Model):
     feedbacks = db.relationship(
         "Feedback", backref="automat", cascade="all, delete-orphan", lazy=True
     )
-    tickets = db.relationship(
-        "Ticket", backref="automat", cascade="all, delete-orphan", lazy=True
-    )
 
 
 class Feedback(db.Model):
@@ -84,9 +81,12 @@ class Feedback(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     automat_id = db.Column(db.Integer, db.ForeignKey("automaten.id"), nullable=False)
     bewertung = db.Column(db.Integer, nullable=False)  # 1..5
-    # kommagetrennte Liste der Kategorien (geschmack,sauberkeit,verfuegbarkeit,auswahl,temperatur,defekt,personal,sonstiges)
+    # kommagetrennte Liste der Kategorien (geschmack,sauberkeit,verfuegbarkeit,auswahl,temperatur,bedienung,sonstiges)
     kategorien = db.Column(db.String(255), nullable=True)
-    kommentar = db.Column(db.Text, nullable=True)
+    # Strukturierter Feedbackbogen
+    was_gut = db.Column(db.Text, nullable=True)
+    was_schlecht = db.Column(db.Text, nullable=True)
+    verbesserung = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
     @property
@@ -97,19 +97,6 @@ class Feedback(db.Model):
     def bewertung_emoji(self) -> str:
         return {1: "😡", 2: "🙁", 3: "😐", 4: "🙂", 5: "😍"}.get(self.bewertung, "❓")
 
-
-class Ticket(db.Model):
-    __tablename__ = "tickets"
-    id = db.Column(db.Integer, primary_key=True)
-    automat_id = db.Column(db.Integer, db.ForeignKey("automaten.id"), nullable=False)
-    beschreibung = db.Column(db.Text, nullable=False)
-    foto_pfad = db.Column(db.String(255), nullable=True)
-    status = db.Column(db.String(20), default="offen", nullable=False)  # offen | in_bearbeitung | erledigt
-    prioritaet = db.Column(db.String(20), default="normal", nullable=False)  # niedrig | normal | hoch
-    erstellt_von_email = db.Column(db.String(200), nullable=True)  # optional, falls anonymes Feedback
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
-    closed_at = db.Column(db.DateTime, nullable=True)
-    bearbeiter_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    notiz = db.Column(db.Text, nullable=True)
-
-    bearbeiter = db.relationship("User")
+    @property
+    def hat_text(self) -> bool:
+        return bool(self.was_gut or self.was_schlecht or self.verbesserung)
